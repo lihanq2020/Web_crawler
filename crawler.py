@@ -10,10 +10,11 @@ import re
 class BDTB:
 
     # 初始化，传入基地址，是否只看楼主的参数
-    def __init__(self, baseUrl):
+    def __init__(self, baseUrl, fileName):
         self.baseURL = baseUrl
         self.page = self.getPage(self.baseURL, 0)
         self.tool = Tool()
+        self.file = open(fileName, 'w')
         #print(self.page)
 
     def getAllContent(self):
@@ -29,7 +30,8 @@ class BDTB:
             if urls:
                 for url in urls:
                     print('title'+url[1])
-                    currUrl = 'https://tieba.baidu.com/p/'+url[0]
+                    currUrl = 'https://tieba.baidu.com/p/'+url[0]+'?'
+                    print(currUrl)
                     currPage = self.getPage(currUrl, 0)
                     numPage = self.getNumOfPages(currPage)
                     self.getContent(currUrl, 1, int(numPage))
@@ -58,7 +60,7 @@ class BDTB:
             return None
 
     def getNumOfPosts(self):
-        pattern = re.compile('共有贴子数<span class="red_text">(.*?)</span>', re.S)
+        pattern = re.compile('共有主题数<span class="red_text">(.*?)</span>', re.S)
         result = re.search(pattern, self.page)
         if result:
             return result.group(1).strip()
@@ -79,7 +81,11 @@ class BDTB:
         for i in range(startPage, endPage+1):
             page = self.getPage(url, i);
             post = re.findall(pattern, page)
-            posts.append([self.tool.replace(rep) for rep in post if rep != ''])
+            for rep in post:
+                if rep != '':
+                    text = self.tool.replace(rep)
+                    posts.append(text)
+                    self.file.writelines(text)
         return posts
 
 
@@ -115,12 +121,6 @@ class Tool:
         return x.strip()
 
 
-baseURL = 'https://tieba.baidu.com/f?kw=steam'
-bdtb = BDTB(baseURL)
+baseURL = 'https://tieba.baidu.com/f?ie=utf-8&kw=%E7%8E%8B%E7%82%B8%E7%9A%84%E9%BA%BB%E8%A2%8B'
+bdtb = BDTB(baseURL, 'wangzhademadai.txt')
 bdtb.getAllContent()
-# posts = bdtb.getContent(1, 24)
-# file = open('game_words.txt', 'w')
-# if posts:
-#     for post in posts:
-#         for rep in post:
-#             file.writelines(rep)

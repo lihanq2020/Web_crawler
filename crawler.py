@@ -4,6 +4,9 @@ import urllib
 import urllib.error
 import urllib.request
 import re
+from time import sleep
+from tqdm import tqdm
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 # 百度贴吧爬虫类
@@ -14,27 +17,39 @@ class BDTB:
         self.baseURL = baseUrl
         self.page = self.getPage(self.baseURL, 0)
         self.tool = Tool()
-        self.file = open(fileName, 'w')
+        self.file = open(fileName, 'a+')
         #print(self.page)
 
-    def getAllContent(self):
+    def getAllContent(self, executor):
         num = int(self.getNumOfPosts())
+        pbar = tqdm(total=num)
+        print()
         print("该贴吧共有"+str(num)+"贴")
         index = 0
+        tasks = []
         while num > 0:
             pattern = re.compile('<a rel=.*? href="/p/(.*?)" title="(.*?)".*?</a>', re.S)
             urls = re.findall(pattern, self.page)
+            pbar.update(len(urls))
             index += len(urls)
             self.page = self.getPage(self.baseURL, index)
             num -= len(urls)
             if urls:
                 for url in urls:
-                    print('title'+url[1])
+                    print('title: '+url[1])
                     currUrl = 'https://tieba.baidu.com/p/'+url[0]+'?'
                     print(currUrl)
                     currPage = self.getPage(currUrl, 0)
-                    numPage = self.getNumOfPages(currPage)
-                    self.getContent(currUrl, 1, int(numPage))
+                    if currPage:
+                        numPage = self.getNumOfPages(currPage)
+                        task = executor.submit(self.getContent, currUrl, 1, int(numPage))
+                        tasks.append(task)
+        pbar.close()
+        for future in as_completed(tasks):
+            # spider方法无返回，则返回为None
+            data = future.result()
+            print(f"main:{data[0:10]}")
+        print('结束啦')
 
 
     # 传入页码，获取该页帖子的代码
@@ -45,7 +60,12 @@ class BDTB:
                 pn = '&pn='+str(pageNum)
             url = url + pn
             response = urllib.request.urlopen(url)
-            return response.read().decode('utf-8')
+            try:
+                page = response.read().decode('utf-8')
+            except UnicodeDecodeError as e:
+                print(u'读取页面失败,错误原因', e.reason)
+                return None
+            return page
         except urllib.error.URLError as e:
             if hasattr(e, "reason"):
                 print(u"连接百度贴吧失败,错误原因", e.reason)
@@ -121,6 +141,8 @@ class Tool:
         return x.strip()
 
 
-baseURL = 'https://tieba.baidu.com/f?ie=utf-8&kw=%E7%8E%8B%E7%82%B8%E7%9A%84%E9%BA%BB%E8%A2%8B'
-bdtb = BDTB(baseURL, 'wangzhademadai.txt')
-bdtb.getAllContent()
+if __name__ == '__main__':
+    executor = ThreadPoolExecutor(max_workers=16)
+    baseURL = 'https://tieba.baidu.com/f?ie=utf-8&kw=%E7%8E%8B%E7%82%B8%E7%9A%84%E9%BA%BB%E8%A2%8B'
+    bdtb = BDTB(baseURL, 'shengyu.txt')
+    bdtb.getAllContent(executor)

@@ -87,6 +87,7 @@ class word2vec():
         for word, sim in words_sorted[:top_n]:
             print(word, sim)
 
+
 if __name__ == '__main__':
     corpus = []
     with open('Data/output.txt') as f:
@@ -97,12 +98,17 @@ if __name__ == '__main__':
             if len(sentence) > 1:
                 corpus.append(sentence)
 
-    settings = {
-        'window_size': 2,
-        'n': 10,
-        'epochs': 50,
-        'learning_rate': 0.01
-    }
-    w2v = word2vec(settings)
-    training_data = w2v.generate_training_data(corpus[:1000])
-    w2v.train(training_data)
+    # settings = {
+    #     'window_size': 2,
+    #     'n': 100,
+    #     'epochs': 50,
+    #     'learning_rate': 0.01
+    # }
+    # w2v = word2vec(settings)
+    # training_data = w2v.generate_training_data(corpus[:10000])
+    # w2v.train(training_data)
+    from gensim.models import word2vec
+    print(word2vec.FAST_VERSION)
+    import multiprocessing
+    model = word2vec.Word2Vec(corpus, size=100, window=3, workers=multiprocessing.cpu_count(), iter=50)
+    model.save("Model/wangzhademadai.w2v")

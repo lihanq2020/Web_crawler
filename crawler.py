@@ -20,12 +20,11 @@ class BDTB:
         self.file = open(fileName, 'a+')
         #print(self.page)
 
-    def getAllContent(self, executor):
-        num = int(self.getNumOfPosts())
+    def getAllContent(self, executor, crawl_from_start=1, index=0):
+        num = int(self.getNumOfPosts())-index
         pbar = tqdm(total=num)
         print()
         print("该贴吧共有"+str(num)+"贴")
-        index = 0
         tasks = []
         while num > 0:
             pattern = re.compile('<a rel=.*? href="/p/(.*?)" title="(.*?)".*?</a>', re.S)
@@ -34,9 +33,10 @@ class BDTB:
             index += len(urls)
             self.page = self.getPage(self.baseURL, index)
             num -= len(urls)
-            if urls:
+            if urls and crawl_from_start:
                 for url in urls:
                     print('title: '+url[1])
+                    self.file.writelines(url[1] + "\n")
                     currUrl = 'https://tieba.baidu.com/p/'+url[0]+'?'
                     print(currUrl)
                     currPage = self.getPage(currUrl, 0)
@@ -44,12 +44,8 @@ class BDTB:
                         numPage = self.getNumOfPages(currPage)
                         task = executor.submit(self.getContent, currUrl, 1, int(numPage))
                         tasks.append(task)
+            crawl_from_start = 1
         pbar.close()
-        for future in as_completed(tasks):
-            # spider方法无返回，则返回为None
-            data = future.result()
-            print(f"main:{data[0:10]}")
-        print('结束啦')
 
 
     # 传入页码，获取该页帖子的代码
@@ -105,7 +101,7 @@ class BDTB:
                 if rep != '':
                     text = self.tool.replace(rep)
                     posts.append(text)
-                    self.file.writelines(text)
+                    self.file.writelines(text + "\n")
         return posts
 
 
@@ -144,5 +140,5 @@ class Tool:
 if __name__ == '__main__':
     executor = ThreadPoolExecutor(max_workers=16)
     baseURL = 'https://tieba.baidu.com/f?ie=utf-8&kw=%E7%8E%8B%E7%82%B8%E7%9A%84%E9%BA%BB%E8%A2%8B'
-    bdtb = BDTB(baseURL, 'shengyu.txt')
+    bdtb = BDTB(baseURL, 'n_wzdmd_crawl.txt')
     bdtb.getAllContent(executor)

@@ -22,5 +22,13 @@ class LogisticRegression:
             if i % 100 == 0:
                 print('cost value is ' + str(self.cost))
 
+    def predict(self, test_x, test_y):
+        sigmoid = lambda t: 1 / (1 + math.e ** -t)
+        p = sigmoid(np.dot(self.theta, test_x.transpose()) + self.bias).astype('float64')
+        error = np.sum(np.abs(test_y - (p/0.5).astype(np.int))) / test_x.shape[0]
+        print("正确率为%s%%" % ((1-error)*100))
+        return (p/0.5).astype(np.int)
+
+
 if __name__ == '__main__':
     l = LogisticRegression()

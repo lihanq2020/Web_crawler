@@ -1,5 +1,5 @@
 import numpy as np
-
+from collections import defaultdict
 class kMeans:
     def train(self, m, sents_vec, sentences):
         centroids = []
@@ -22,8 +22,8 @@ class kMeans:
         return centroids, sents_cluster
 
     def choose_cluster(self, m, sents_vec, centroids, sentences):
-        clusters = {}
-        sents_cluster = {}
+        clusters = defaultdict(list)
+        sents_cluster = defaultdict(list)
         for j in range(sents_vec.shape[0]):
             vec = sents_vec[j]
             min_dis = 2
@@ -34,9 +34,6 @@ class kMeans:
                     if sim < min_dis:
                         min_dis = sim
                         min_c = i
-                if min_c not in clusters:
-                    clusters[min_c] = []
-                    sents_cluster[min_c] = []
                 clusters[min_c].append(vec)
                 sents_cluster[min_c].append(sentences[j])
         return clusters, sents_cluster

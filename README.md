@@ -22,3 +22,5 @@ Words/find_new_token.py
 n_skip_gram.w2v 链接:https://pan.baidu.com/s/12w_Csh1oiVYoeBYs7Gyfzw  密码:reac
 
 n_cbow.w2v 链接:https://pan.baidu.com/s/1Ccxz4gvyT3j8gLj1v1if4A  密码:vqs1
+
+ ![image](https://raw.githubusercontent.com/lihanq2020/Web_crawler/master/img-folder/935d802a9f95c1388a1bbd2abeee8747.gif)

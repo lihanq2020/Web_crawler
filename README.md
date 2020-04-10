@@ -23,4 +23,4 @@ n_skip_gram.w2v 链接:https://pan.baidu.com/s/12w_Csh1oiVYoeBYs7Gyfzw  密码:r
 
 n_cbow.w2v 链接:https://pan.baidu.com/s/1Ccxz4gvyT3j8gLj1v1if4A  密码:vqs1
 
- ![image](https://raw.githubusercontent.com/lihanq2020/Web_crawler/master/img-folder/7346bb96d096bf43f78c1425bd2d98e2.gif)
+ ![image](https://raw.githubusercontent.com/lihanq2020/Web_crawler/master/img-folder/1b5345bd87c4c6abbe2e1163c9575ad2.gif)

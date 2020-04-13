@@ -90,7 +90,7 @@ class word2vec():
 
 if __name__ == '__main__':
     corpus = []
-    with open('Data/output.txt') as f:
+    with open('data/output.txt') as f:
         for line in f:
             sentence = []
             for word in line.split():
@@ -111,4 +111,4 @@ if __name__ == '__main__':
     print(word2vec.FAST_VERSION)
     import multiprocessing
     model = word2vec.Word2Vec(corpus, size=100, window=3, workers=multiprocessing.cpu_count(), iter=50)
-    model.save("Model/wangzhademadai.w2v")
+    model.save("model/wangzhademadai.w2v")

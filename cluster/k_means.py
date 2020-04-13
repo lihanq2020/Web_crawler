@@ -17,14 +17,10 @@ class KMeans:
         R = random.randint(0, sents_vec.shape[0]-1)
         self.centroids.append(sents_vec[R])
         stack = MaxStack(m-1)
-        for i in range(sents_vec.shape[0]):
-            sim = self.cosine_simi(sents_vec[i], self.centroids[0])
-            stack.push(sim, sents_vec[i])
-        data = stack.get_data_list()
-        for i in data:
-            self.centroids.append(i)
+        [stack.push(self.cosine_simi(vec, self.centroids[0]), vec) for vec in sents_vec]
+        self.centroids += stack.get_data_list()
         while True:
-            clusters = self.choose_cluster(m, sents_vec, self.centroids)
+            clusters = self.choose_cluster(sents_vec, self.centroids)[0]
             n_centroids = self.update_centroids(clusters)
             flag = 0
             for i in range(len(self.centroids)):
@@ -38,7 +34,7 @@ class KMeans:
             else:
                 break
 
-    def choose_cluster(self, m, sents_vec, centroids):
+    def choose_cluster(self, sents_vec, centroids):
         """
         put data to the closest centroid based on cosine similarity
         :param m:
@@ -47,51 +43,29 @@ class KMeans:
         :return:
         """
         clusters = defaultdict(list)
-        for j in range(sents_vec.shape[0]):
-            vec = sents_vec[j]
-            min_dis = 2
-            min_c = -1
-            if any(vec) != 0:
-                for i in range(len(centroids)):
-                    sim = self.cosine_simi(vec, centroids[i])
-                    if sim <= min_dis:
-                        min_dis = sim
-                        min_c = i
-                clusters[min_c].append(vec)
-        return clusters
+        result = []
+        for vec in sents_vec:
+            min_dis = {i: self.cosine_simi(vec, centroids[i]) for i in range(len(centroids))}
+            min_c = min(min_dis.keys(), key=(lambda k: min_dis[k]))
+            clusters[min_c].append(vec)
+            result.append(min_c)
+        return clusters, result
 
     def update_centroids(self, clusters):
-        centroids = []
-        for k, s_vec in clusters.items():
-            c = np.zeros(s_vec[0].shape[0])
-            for vec in s_vec:
-                c = c + vec
-            if any(c) != 0:
-                c = c / len(s_vec)
-                centroids.append(c)
+        centroids = [sum(s_vec)/len(s_vec) for k, s_vec in clusters.items() if len(s_vec) != 0 and any(sum(s_vec)) != 0]
         return centroids
 
     def cosine_simi(self, vec, cent):
         if vec.shape[0] > 1:
             vec_norm = np.sqrt(np.dot(vec, vec))
             cent_norm = np.sqrt(np.dot(cent, cent))
+            if vec_norm == 0 or cent_norm == 0:
+                return 2
             return 1 - np.dot(vec, cent) / (vec_norm * cent_norm)
         return np.abs(vec - cent)
 
     def predict(self, sents_vec):
-        result = []
-        for j in range(sents_vec.shape[0]):
-            vec = sents_vec[j]
-            min_dis = 2
-            min_c = -1
-            if any(vec) != 0:
-                for i in range(len(self.centroids)):
-                    sim = self.cosine_simi(vec, self.centroids[i])
-                    if sim <= min_dis:
-                        min_dis = sim
-                        min_c = i
-                result.append(min_c)
-        return result
+        return self.choose_cluster(sents_vec, self.centroids)[1]
 
 
 if __name__ == '__main__':

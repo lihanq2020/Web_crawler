@@ -91,14 +91,14 @@ class FindNewToken:
 
 
 if __name__ == '__main__':
-    input_path = 'Data/n_wzdmd_crawl.txt'
-    output_path = 'Data/user_dict.txt'
+    input_path = '../data/n_wzdmd_crawl.txt'
+    output_path = '../data/user_dict.txt'
     findtoken = FindNewToken(input_path, output_path)
     findtoken.read_text()
     ngrams = findtoken.statistic_ngrams()
     findtoken.filter_ngrams()
     final_words = findtoken.Entropy_left_right_filter(1)
-    findtoken.write(final_words)
+    #findtoken.write(final_words)
     # two_grams = ['撕逼', '开开', '大王', '小王', '千千', '纸鸟', '水产', '可爱', '王源']
     # two_proba = sum([findtoken.calculate_prob(w, ngrams) for w in two_grams]) / len(two_grams)
     # three_grams = ['文明旅', '恩负义', '业院校']
